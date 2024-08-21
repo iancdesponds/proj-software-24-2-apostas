@@ -5,6 +5,7 @@ import br.insper.aposta.aposta.exception.PartidaNotFoundException;
 import br.insper.aposta.aposta.exception.PartidaUnavailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.UUID;
 
 @Service
 public class ApostaService {
+
+    @Value("${partida.service.url}")
+    private String partidaServiceUrl;
 
     @Autowired
     private ApostaRepository apostaRepository;
@@ -24,7 +28,7 @@ public class ApostaService {
 
         try {
             PartidaResponse partida = restTemplate.getForObject(
-                    "http://localhost:8080/partida/" + aposta.getIdPartida(),
+                    partidaServiceUrl + "partida/" + aposta.getIdPartida(),
                     PartidaResponse.class);
             if (partida.getStatus().equals("AGENDADA")) {
                 aposta.setStatus("REALIZADA");
@@ -54,7 +58,7 @@ public class ApostaService {
 
         if (aposta.getStatus().equals("REALIZADA")) {
             // Faça a requisição GET para obter os dados da partida
-            String url = "http://localhost:8080/partida/" + aposta.getIdPartida();
+            String url = partidaServiceUrl + "partida/" + aposta.getIdPartida();
             PartidaResponse partidaResponse = restTemplate.getForObject(url, PartidaResponse.class);
 
             if (partidaResponse != null && partidaResponse.getPlacarMandante() != null && partidaResponse.getPlacarVisitante() != null) {
